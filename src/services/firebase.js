@@ -31,7 +31,7 @@ const build = (node) => {
 
 const getCurrentUser = () => firebase.auth().currentUser
 
-const isLogged = () => getCurrentUser()
+const isAuthenticated = () => getCurrentUser()
 
 export {
   sync,
@@ -40,7 +40,5 @@ export {
   googleAuth,
   signOut,
   getCurrentUser,
-  isLogged
+  isAuthenticated
 }
-
-export default firebaseDatabase

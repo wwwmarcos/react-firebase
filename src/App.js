@@ -1,10 +1,17 @@
 import React, { Component } from 'react'
 import './App.css'
-import { build, googleAuth, signOut, getCurrentUser } from './services/firebase'
 
+import { firebase } from './services'
 import { MuiThemeProvider } from '@material-ui/core/styles/index'
 import { AppBar, Toolbar, Typography, IconButton, Menu as MenuIcon, Button } from '@material-ui/core'
 import { createMuiTheme, withStyles } from '@material-ui/core/styles'
+
+import { PrivateRoute } from './components'
+
+import {
+  BrowserRouter as Router,
+  Route
+} from 'react-router-dom'
 
 import themeConfig from './constants/theme.config'
 
@@ -24,7 +31,7 @@ const styles = theme => ({
   }
 })
 
-const firebase = build('teste')
+const firebaseData = firebase.build('teste')
 
 class App extends Component {
   constructor (props) {
@@ -35,7 +42,7 @@ class App extends Component {
   }
 
   componentDidMount () {
-    firebase.sync((data) => {
+    firebaseData.sync((data) => {
       this.setState({
         data
       })
@@ -44,7 +51,7 @@ class App extends Component {
 
   async login () {
     try {
-      const result = await googleAuth()
+      const result = await firebase.googleAuth()
       console.log('result', result)
     } catch (error) {
       console.log('error', error)
@@ -53,7 +60,7 @@ class App extends Component {
 
   async logOut () {
     try {
-      await signOut()
+      await firebase.signOut()
     } catch (error) {
       console.log('error', error)
     }
@@ -62,35 +69,30 @@ class App extends Component {
   render () {
     const { classes } = this.props
     return (
-      <MuiThemeProvider theme={theme}>
-        <React.Fragment>
-          <AppBar position='static'>
-            <Toolbar>
-              <IconButton className={classes.menuButton} color='contrast' onClick={this.props.toggleDrawer}><MenuIcon /></IconButton>
-              <Typography className={classes.flex} type='title' color='inherit'>
-                My fnk app
-              </Typography>
-              <div>
-                <Button color onClick={() => this.login()} className={classes.button}>
-                  LOGIN
-                </Button>
-                <Button onClick={() => this.logOut()} className={classes.button}>
-                  LOG OUT
-                </Button>
-              </div>
-            </Toolbar>
-          </AppBar>
-          <div className='App'>
+      <Router>
 
-            <p className='App-intro'>
-              {
-                JSON.stringify(getCurrentUser(), null, 2)
-              }
-            </p>
-            <Button variant='contained' color='primary' onClick={() => firebase.push({ sera: 'im ' })}>PUSHHHHHH DATAAAAA</Button>
-          </div>
-        </React.Fragment>
-      </MuiThemeProvider>
+        <MuiThemeProvider theme={theme}>
+          <React.Fragment>
+            <AppBar position='static'>
+              <Toolbar>
+                <IconButton className={classes.menuButton} color='contrast' onClick={this.props.toggleDrawer}><MenuIcon /></IconButton>
+                <Typography className={classes.flex} type='title' color='inherit'>
+                My fnk app
+                </Typography>
+                <div>
+                  <Button onClick={() => this.logOut()} className={classes.button}>
+                    SAIR
+                  </Button>
+                </div>
+              </Toolbar>
+            </AppBar>
+
+            <Route path='/login' component={() => JSON.stringify(firebase.isAuthenticated(), null, 2)} />
+            <PrivateRoute path='/' component={() => 'home'} />
+
+          </React.Fragment>
+        </MuiThemeProvider>
+      </Router>
     )
   }
 }
